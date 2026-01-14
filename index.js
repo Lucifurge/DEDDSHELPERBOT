@@ -1,7 +1,12 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  REST,
+  Routes,
+  SlashCommandBuilder
+} = require("discord.js");
 const express = require("express");
-const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
@@ -15,71 +20,67 @@ process.on("uncaughtException", err => console.error("Uncaught:", err));
    EXPRESS KEEP-ALIVE
 ========================= */
 const app = express();
-app.get("/", (req, res) => {
-  console.log(`Ping at ${new Date().toLocaleTimeString()}`);
-  res.send("Community bot is alive");
-});
-app.listen(process.env.PORT || 3000, () => {
-  console.log("✅ Express server running");
-});
+app.get("/", (req, res) => res.send("Bot is alive"));
+app.listen(process.env.PORT || 3000, () =>
+  console.log("✅ Express running")
+);
 
 /* =========================
    DISCORD CLIENT
 ========================= */
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers
+  ]
+});
 
 /* =========================
-   START TIME
+   STORAGE
 ========================= */
-const startTime = Date.now();
+const dataFile = path.join(__dirname, "welcomeConfig.json");
 
-/* =========================
-   STORAGE FILE
-========================= */
-const memeFile = path.join(__dirname, "memeChannels.json");
+const load = () =>
+  fs.existsSync(dataFile)
+    ? JSON.parse(fs.readFileSync(dataFile))
+    : {};
 
-const load = f => fs.existsSync(f) ? JSON.parse(fs.readFileSync(f)) : {};
-const save = (f, d) => fs.writeFileSync(f, JSON.stringify(d, null, 2));
+const save = data =>
+  fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
 
-let memeChannels = load(memeFile);
-
-/* =========================
-   SAFE API
-========================= */
-async function safeMeme() {
-  try {
-    const r = await axios.get("https://meme-api.com/gimme", { timeout: 4000 });
-    return r.data;
-  } catch {
-    return null;
-  }
-}
+let config = load();
 
 /* =========================
    SLASH COMMANDS
 ========================= */
 const commands = [
-  new SlashCommandBuilder().setName("ping").setDescription("Check bot status"),
-  new SlashCommandBuilder().setName("help").setDescription("Show all commands"),
-  new SlashCommandBuilder().setName("uptime").setDescription("Bot uptime"),
-  new SlashCommandBuilder().setName("serverinfo").setDescription("Server info"),
   new SlashCommandBuilder()
-    .setName("userinfo")
-    .setDescription("Get info about a user")
-    .addUserOption(o => o.setName("user").setDescription("Select user").setRequired(false)),
+    .setName("ping")
+    .setDescription("Check bot status"),
+
   new SlashCommandBuilder()
-    .setName("avatar")
-    .setDescription("Get a user's avatar")
-    .addUserOption(o => o.setName("user").setDescription("Select user").setRequired(false)),
-  new SlashCommandBuilder().setName("coinflip").setDescription("Flip a coin"),
-  new SlashCommandBuilder().setName("roll").setDescription("Roll a dice"),
-  new SlashCommandBuilder().setName("meme").setDescription("Send a meme"),
-  new SlashCommandBuilder()
-    .setName("setmemeschannel")
-    .setDescription("Set the channel for automatic memes")
+    .setName("setwelcome")
+    .setDescription("Set welcome message")
     .addChannelOption(o =>
-      o.setName("channel").setDescription("Channel for memes").setRequired(true)
-    )
+      o.setName("channel").setDescription("Welcome channel").setRequired(true))
+    .addStringOption(o =>
+      o.setName("message").setDescription("Welcome message").setRequired(true))
+    .addStringOption(o =>
+      o.setName("color").setDescription("HEX color (ex: #00ff99)"))
+    .addStringOption(o =>
+      o.setName("gif").setDescription("GIF or image URL")),
+
+  new SlashCommandBuilder()
+    .setName("setgoodbye")
+    .setDescription("Set goodbye message")
+    .addChannelOption(o =>
+      o.setName("channel").setDescription("Goodbye channel").setRequired(true))
+    .addStringOption(o =>
+      o.setName("message").setDescription("Goodbye message").setRequired(true))
+    .addStringOption(o =>
+      o.setName("color").setDescription("HEX color"))
+    .addStringOption(o =>
+      o.setName("gif").setDescription("GIF or image URL"))
 ].map(c => c.toJSON());
 
 /* =========================
@@ -95,7 +96,7 @@ const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
     );
     console.log("✅ Commands registered");
   } catch (e) {
-    console.error("Command register error:", e);
+    console.error("Command error:", e);
   }
 })();
 
@@ -106,48 +107,32 @@ client.on("interactionCreate", async i => {
   if (!i.isCommand()) return;
 
   try {
-    switch (i.commandName) {
-      case "ping":
-        return i.reply("🟢 Bot Online");
+    if (i.commandName === "ping") {
+      return i.reply("🟢 Bot online");
+    }
 
-      case "help":
-        return i.reply(
-          "**📜 Community Commands**\n" +
-          "/ping\n/help\n/uptime\n/serverinfo\n/userinfo\n/avatar\n" +
-          "/meme\n/coinflip\n/roll\n/setmemeschannel"
-        );
+    if (i.commandName === "setwelcome") {
+      config[i.guildId] ??= {};
+      config[i.guildId].welcome = {
+        channel: i.options.getChannel("channel").id,
+        message: i.options.getString("message"),
+        color: i.options.getString("color") || "#00ff99",
+        gif: i.options.getString("gif")
+      };
+      save(config);
+      return i.reply("✅ Welcome message set!");
+    }
 
-      case "uptime":
-        return i.reply(`⏱ Uptime: ${Math.floor((Date.now() - startTime) / 1000)}s`);
-
-      case "serverinfo":
-        return i.reply(`🏠 ${i.guild.name}\n👥 Members: ${i.guild.memberCount}`);
-
-      case "userinfo": {
-        const user = i.options.getUser("user") || i.user;
-        return i.reply(`👤 ${user.tag}\n🆔 ${user.id}`);
-      }
-
-      case "avatar": {
-        const user = i.options.getUser("user") || i.user;
-        return i.reply(user.displayAvatarURL({ size: 512 }));
-      }
-
-      case "coinflip":
-        return i.reply(Math.random() < 0.5 ? "🪙 Heads" : "🪙 Tails");
-
-      case "roll":
-        return i.reply(`🎲 Rolled: ${Math.floor(Math.random() * 6) + 1}`);
-
-      case "meme": {
-        const m = await safeMeme();
-        return i.reply(m ? { content: m.title, files: [m.url] } : "No meme available");
-      }
-
-      case "setmemeschannel":
-        memeChannels[i.guildId] = i.options.getChannel("channel").id;
-        save(memeFile, memeChannels);
-        return i.reply("✅ Meme channel set!");
+    if (i.commandName === "setgoodbye") {
+      config[i.guildId] ??= {};
+      config[i.guildId].goodbye = {
+        channel: i.options.getChannel("channel").id,
+        message: i.options.getString("message"),
+        color: i.options.getString("color") || "#ff5555",
+        gif: i.options.getString("gif")
+      };
+      save(config);
+      return i.reply("✅ Goodbye message set!");
     }
   } catch (e) {
     console.error(e);
@@ -156,31 +141,57 @@ client.on("interactionCreate", async i => {
 });
 
 /* =========================
-   BACKGROUND JOB
+   WELCOME EVENT
 ========================= */
-function startJobs() {
-  // Memes every 1 hour
-  setInterval(async () => {
-    for (const g in memeChannels) {
-      try {
-        const c = await client.channels.fetch(memeChannels[g]);
-        const m = await safeMeme();
-        if (c && m) {
-          c.send({ content: m.title, files: [m.url] });
-        }
-      } catch (e) {
-        console.error("Meme job error:", e);
-      }
-    }
-  }, 60 * 60 * 1000); // 1 hour
-}
+client.on("guildMemberAdd", async member => {
+  const cfg = config[member.guild.id]?.welcome;
+  if (!cfg) return;
+
+  const channel = await member.guild.channels.fetch(cfg.channel).catch(() => null);
+  if (!channel) return;
+
+  const embed = {
+    color: parseInt(cfg.color.replace("#", ""), 16),
+    title: "🎉 Welcome!",
+    description: cfg.message
+      .replace("{user}", `<@${member.id}>`)
+      .replace("{server}", member.guild.name),
+    thumbnail: { url: member.user.displayAvatarURL() }
+  };
+
+  if (cfg.gif) embed.image = { url: cfg.gif };
+
+  channel.send({ embeds: [embed] });
+});
+
+/* =========================
+   GOODBYE EVENT
+========================= */
+client.on("guildMemberRemove", async member => {
+  const cfg = config[member.guild.id]?.goodbye;
+  if (!cfg) return;
+
+  const channel = await member.guild.channels.fetch(cfg.channel).catch(() => null);
+  if (!channel) return;
+
+  const embed = {
+    color: parseInt(cfg.color.replace("#", ""), 16),
+    title: "👋 Goodbye",
+    description: cfg.message
+      .replace("{user}", member.user.tag)
+      .replace("{server}", member.guild.name)
+  };
+
+  if (cfg.gif) embed.image = { url: cfg.gif };
+
+  channel.send({ embeds: [embed] });
+});
 
 /* =========================
    READY
 ========================= */
 client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
-  startJobs();
 });
 
 /* =========================
