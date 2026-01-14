@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require("discord.js");
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
@@ -52,7 +52,16 @@ const commands = [
     .addChannelOption(o => o.setName("channel").setDescription("Goodbye channel").setRequired(true))
     .addStringOption(o => o.setName("message").setDescription("Goodbye message").setRequired(true))
     .addStringOption(o => o.setName("color").setDescription("HEX color"))
-    .addStringOption(o => o.setName("gif").setDescription("GIF or image URL"))
+    .addStringOption(o => o.setName("gif").setDescription("GIF or image URL")),
+
+  new SlashCommandBuilder()
+    .setName("announce")
+    .setDescription("Send an announcement embed")
+    .addChannelOption(o => o.setName("channel").setDescription("Channel to announce").setRequired(true))
+    .addStringOption(o => o.setName("title").setDescription("Title of the embed").setRequired(true))
+    .addStringOption(o => o.setName("description").setDescription("Description for the embed").setRequired(true))
+    .addStringOption(o => o.setName("color").setDescription("HEX color for embed"))
+    .addStringOption(o => o.setName("image").setDescription("Image/GIF URL"))
 ].map(c => c.toJSON());
 
 /* =========================
@@ -101,6 +110,27 @@ client.on("interactionCreate", async i => {
       return i.reply("✅ Goodbye message set!");
     }
 
+    if (i.commandName === "announce") {
+      const channel = i.options.getChannel("channel");
+      const title = i.options.getString("title");
+      const description = i.options.getString("description");
+      let color = i.options.getString("color") || "#00ffcc";
+      const image = i.options.getString("image") || null;
+
+      color = parseInt(color.replace("#", ""), 16);
+
+      const embed = new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(description)
+        .setColor(color)
+        .setTimestamp();
+
+      if (image) embed.setImage(image);
+
+      await channel.send({ embeds: [embed] });
+      return i.reply(`✅ Announcement sent to ${channel}`);
+    }
+
   } catch (e) {
     console.error(e);
     if (!i.replied) i.reply("⚠️ Error handled safely");
@@ -123,9 +153,7 @@ client.on("guildMemberAdd", async member => {
   const embed = {
     color,
     title: `🎉 Welcome!`,
-    description: cfg.message
-      .replace("{user}", `<@${member.id}>`)
-      .replace("{server}", member.guild.name),
+    description: cfg.message.replace("{user}", `<@${member.id}>`).replace("{server}", member.guild.name),
     thumbnail: { url: member.user.displayAvatarURL() }
   };
 
@@ -150,9 +178,7 @@ client.on("guildMemberRemove", async member => {
   const embed = {
     color,
     title: `👋 Goodbye`,
-    description: cfg.message
-      .replace("{user}", member.user.tag)
-      .replace("{server}", member.guild.name)
+    description: cfg.message.replace("{user}", member.user.tag).replace("{server}", member.guild.name)
   };
 
   if (cfg.gif) embed.image = { url: cfg.gif };
@@ -169,3 +195,10 @@ client.once("ready", () => console.log(`✅ Logged in as ${client.user.tag}`));
    LOGIN
 ========================= */
 client.login(process.env.TOKEN);
+
+/* =========================
+   KEEP BOT ONLINE 24/7
+========================= */
+setInterval(() => {
+  console.log("🟢 Keep-alive ping at " + new Date().toLocaleTimeString());
+}, 5 * 60 * 1000); // every 5 minutes
