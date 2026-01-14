@@ -123,12 +123,15 @@ client.on("guildMemberAdd", async member => {
   const embed = {
     color,
     title: `🎉 Welcome!`,
-    description: cfg.message.replace("{user}", `<@${member.id}>`).replace("{server}", member.guild.name),
+    description: cfg.message
+      .replace("{user}", `<@${member.id}>`)
+      .replace("{server}", member.guild.name),
     thumbnail: { url: member.user.displayAvatarURL() }
   };
 
   if (cfg.gif) embed.image = { url: cfg.gif };
-  channel.send({ embeds: [embed] });
+
+  channel.send({ embeds: [embed] }).catch(console.error);
 });
 
 /* =========================
@@ -147,11 +150,14 @@ client.on("guildMemberRemove", async member => {
   const embed = {
     color,
     title: `👋 Goodbye`,
-    description: cfg.message.replace("{user}", member.user.tag).replace("{server}", member.guild.name)
+    description: cfg.message
+      .replace("{user}", member.user.tag)
+      .replace("{server}", member.guild.name)
   };
 
   if (cfg.gif) embed.image = { url: cfg.gif };
-  channel.send({ embeds: [embed] });
+
+  channel.send({ embeds: [embed] }).catch(console.error);
 });
 
 /* =========================
