@@ -5,21 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bible Helper Bot Dashboard</title>
   <style>
-    :root {
-      --green: #00ff99;
-      --gold: #ffd700;
-      --dark: #0b1a12;
-      --card: #11261a;
-      --white: #ffffff;
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
     }
 
-    * { box-sizing: border-box; margin:0; padding:0; }
-
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(180deg, #08140d, #0b1a12);
-      color: var(--white);
-      min-height: 100vh;
+    a {
+      text-decoration: none;
+      color: inherit;
     }
 
     /* Navbar */
@@ -27,187 +23,159 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(90deg, var(--green), var(--gold));
+      background: linear-gradient(90deg, #00ff99, #ffd700);
       padding: 1rem 2rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
 
     nav h1 {
-      color: var(--dark);
+      margin: 0;
       font-size: 1.8rem;
+      color: #000;
+      font-weight: bold;
     }
 
     nav ul {
       display: flex;
       list-style: none;
+      padding: 0;
+      margin: 0;
     }
 
     nav ul li {
-      margin-left: 1.5rem;
+      margin-left: 2rem;
     }
 
     nav ul li a {
-      color: var(--dark);
-      text-decoration: none;
       font-weight: bold;
-      transition: all 0.3s;
+      color: #000;
+      transition: 0.3s;
     }
 
     nav ul li a:hover {
-      color: var(--white);
+      color: #fff;
     }
 
-    /* Header */
-    header {
-      text-align: center;
-      padding: 50px 20px;
-    }
-
-    header h2 {
-      font-size: 2.5rem;
-      color: var(--green);
-      margin-bottom: 10px;
-    }
-
-    header p {
-      color: var(--gold);
-      font-size: 1.2rem;
-    }
-
-    /* Container */
+    /* Main Dashboard */
     .container {
       max-width: 1200px;
-      margin: auto;
-      padding: 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
 
-    /* Cards */
     .card {
-      background: var(--card);
-      border-radius: 15px;
-      padding: 25px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,215,0,0.2);
+      background: linear-gradient(145deg, #111, #222);
+      border: 1px solid #00ff99;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 20px rgba(0,255,153,0.3);
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
     }
 
     .card h3 {
-      color: var(--gold);
-      margin-bottom: 15px;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #ffd700;
     }
 
     .status {
-      font-size: 1.1rem;
-      line-height: 1.7;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
     }
 
-    .online { color: var(--green); font-weight: bold; }
-    .offline { color: #ff5c5c; font-weight: bold; }
-
-    .command {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .command:last-child { border-bottom: none; }
-    .command-name { color: var(--green); font-weight: 600; }
-    .command-desc { color: var(--white); opacity: 0.8; }
-
-    .button {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 12px 25px;
-      background: linear-gradient(135deg, var(--green), var(--gold));
-      color: var(--dark);
+    .online {
+      color: #00ff99;
       font-weight: bold;
-      border-radius: 30px;
-      text-decoration: none;
-      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 25px rgba(0,255,153,0.5);
+    .offline {
+      color: #ff5555;
+      font-weight: bold;
     }
 
-    footer {
+    .commands-list {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .commands-list div {
+      flex: 1 1 200px;
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #111;
+      border-left: 4px solid #00ff99;
+      border-radius: 8px;
+    }
+
+    .footer {
       text-align: center;
-      padding: 25px;
-      opacity: 0.7;
+      margin: 3rem 0 1rem;
       font-size: 0.9rem;
-      margin-top: 50px;
+      color: #888;
     }
   </style>
 </head>
 <body>
-
   <nav>
     <h1>Bible Helper Bot</h1>
     <ul>
-      <li><a href="https://biblebots-1shb.onrender.com/#bots">Home</a></li>
+      <li><a href="/">Home</a></li>
       <li><a href="https://deddsbot.onrender.com/" target="_blank">Bible Engine Bot</a></li>
     </ul>
   </nav>
 
-  <header>
-    <h2>High-Tech Bible Helper</h2>
-    <p>Spread God's Word with Welcome, Goodbye, and Announcement Commands</p>
-  </header>
-
-  <section class="container">
-
+  <div class="container">
+    <!-- Bot Status Card -->
     <div class="card">
-      <h3>🤖 Bot Status</h3>
+      <h3>Bot Status</h3>
       <div id="status" class="status">Checking status...</div>
+      <div id="servers" class="status">Servers: ...</div>
     </div>
 
+    <!-- Commands Card -->
     <div class="card">
-      <h3>📜 Commands</h3>
-      <div id="commands">
-        <div class="command"><div class="command-name">/ping</div><div class="command-desc">Check bot status</div></div>
-        <div class="command"><div class="command-name">/setwelcome</div><div class="command-desc">Set welcome message</div></div>
-        <div class="command"><div class="command-name">/setgoodbye</div><div class="command-desc">Set goodbye message</div></div>
-        <div class="command"><div class="command-name">/announce</div><div class="command-desc">Send announcement embed</div></div>
+      <h3>Slash Commands</h3>
+      <div class="commands-list">
+        <div>/ping - Check bot status</div>
+        <div>/setwelcome - Set welcome message</div>
+        <div>/setgoodbye - Set goodbye message</div>
+        <div>/announce - Send an announcement embed</div>
       </div>
     </div>
 
+    <!-- About Devs -->
     <div class="card">
-      <h3>🚀 Get Started</h3>
-      <p>This bot allows servers to send custom welcome, goodbye messages and announcements with embeds. Perfect for keeping your server alive and organized using God’s Word.</p>
-      <a class="button" href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands" target="_blank">Invite to Discord</a>
+      <h3>About the Developers</h3>
+      <p>This bot was created to spread the Bible and God’s Word using Discord. <br>
+      Developed by <strong>Dev Luke</strong>, <strong>Dev Zap</strong>, and <strong>Lead Dev Aether</strong>, the founders of the Bible Bots initiative.</p>
     </div>
+  </div>
 
-    <div class="card">
-      <h3>🛠 Developers</h3>
-      <p>Created and maintained by: <br>Dev Luke, Dev Zap, and <strong>Lead Dev Aether</strong></p>
-    </div>
-
-  </section>
-
-  <footer>
-    © 2026 Bible Helper Bot • Built with 💚 & ✨
-  </footer>
+  <div class="footer">© 2026 Bible Bots</div>
 
   <script>
-    async function checkStatus() {
+    async function fetchStatus() {
       try {
-        // Use your deployed URL to check if bot website is alive
-        const res = await fetch("https://deddshelperbot.onrender.com/");
-        document.getElementById("status").innerHTML = res.ok
+        const res = await fetch("https://deddshelperbot.onrender.com/api/status");
+        if (!res.ok) throw new Error("Offline");
+        const data = await res.json();
+        document.getElementById("status").innerHTML = data.online
           ? '<span class="online">ONLINE</span>'
           : '<span class="offline">OFFLINE</span>';
+        document.getElementById("servers").innerHTML = "Servers: " + (data.servers || 0);
       } catch {
         document.getElementById("status").innerHTML = '<span class="offline">OFFLINE</span>';
+        document.getElementById("servers").innerHTML = "Servers: 0";
       }
     }
 
-    checkStatus();
-    setInterval(checkStatus, 15000); // Update every 15 seconds
+    fetchStatus();
+    setInterval(fetchStatus, 15000);
   </script>
-
 </body>
 </html>
