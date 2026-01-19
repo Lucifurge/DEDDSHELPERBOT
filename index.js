@@ -11,10 +11,19 @@ process.on("unhandledRejection", err => console.error("Unhandled:", err));
 process.on("uncaughtException", err => console.error("Uncaught:", err));
 
 /* =========================
-   EXPRESS KEEP-ALIVE
+   EXPRESS SERVER & FRONTEND
 ========================= */
 const app = express();
-app.get("/", (_, res) => res.send("Bot is alive"));
+
+// Serve static files from "public" folder
+app.use(express.static(path.join(__dirname, "public")));
+
+// Serve index.html on root
+app.get("/", (_, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Start server
 app.listen(process.env.PORT || 3000, () => console.log("✅ Express running"));
 
 /* =========================
@@ -73,67 +82,66 @@ const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
     await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
     console.log("✅ Commands registered");
   } catch (e) {
-    console.error("Command error:", e);
+    console.error("Command registration error:", e);
   }
 })();
 
 /* =========================
    COMMAND HANDLER
 ========================= */
-client.on("interactionCreate", async i => {
-  if (!i.isCommand()) return;
+client.on("interactionCreate", async interaction => {
+  if (!interaction.isCommand()) return;
 
   try {
-    if (i.commandName === "ping") return i.reply("🟢 Bot online");
+    switch(interaction.commandName) {
+      case "ping":
+        return interaction.reply("🟢 Bot online");
 
-    if (i.commandName === "setwelcome") {
-      config[i.guildId] ??= {};
-      config[i.guildId].welcome = {
-        channel: i.options.getChannel("channel").id,
-        message: i.options.getString("message"),
-        color: i.options.getString("color") || "#00ff99",
-        gif: i.options.getString("gif") || null
-      };
-      save(config);
-      return i.reply("✅ Welcome message set!");
+      case "setwelcome":
+        config[interaction.guildId] ??= {};
+        config[interaction.guildId].welcome = {
+          channel: interaction.options.getChannel("channel").id,
+          message: interaction.options.getString("message"),
+          color: interaction.options.getString("color") || "#00ff99",
+          gif: interaction.options.getString("gif") || null
+        };
+        save(config);
+        return interaction.reply("✅ Welcome message set!");
+
+      case "setgoodbye":
+        config[interaction.guildId] ??= {};
+        config[interaction.guildId].goodbye = {
+          channel: interaction.options.getChannel("channel").id,
+          message: interaction.options.getString("message"),
+          color: interaction.options.getString("color") || "#ff5555",
+          gif: interaction.options.getString("gif") || null
+        };
+        save(config);
+        return interaction.reply("✅ Goodbye message set!");
+
+      case "announce":
+        const channel = interaction.options.getChannel("channel");
+        const title = interaction.options.getString("title");
+        const description = interaction.options.getString("description");
+        let color = interaction.options.getString("color") || "#00ffcc";
+        const image = interaction.options.getString("image") || null;
+
+        color = parseInt(color.replace("#",""), 16);
+
+        const embed = new EmbedBuilder()
+          .setTitle(title)
+          .setDescription(description)
+          .setColor(color)
+          .setTimestamp();
+
+        if(image) embed.setImage(image);
+
+        await channel.send({ embeds: [embed] });
+        return interaction.reply(`✅ Announcement sent to ${channel}`);
     }
-
-    if (i.commandName === "setgoodbye") {
-      config[i.guildId] ??= {};
-      config[i.guildId].goodbye = {
-        channel: i.options.getChannel("channel").id,
-        message: i.options.getString("message"),
-        color: i.options.getString("color") || "#ff5555",
-        gif: i.options.getString("gif") || null
-      };
-      save(config);
-      return i.reply("✅ Goodbye message set!");
-    }
-
-    if (i.commandName === "announce") {
-      const channel = i.options.getChannel("channel");
-      const title = i.options.getString("title");
-      const description = i.options.getString("description");
-      let color = i.options.getString("color") || "#00ffcc";
-      const image = i.options.getString("image") || null;
-
-      color = parseInt(color.replace("#", ""), 16);
-
-      const embed = new EmbedBuilder()
-        .setTitle(title)
-        .setDescription(description)
-        .setColor(color)
-        .setTimestamp();
-
-      if (image) embed.setImage(image);
-
-      await channel.send({ embeds: [embed] });
-      return i.reply(`✅ Announcement sent to ${channel}`);
-    }
-
   } catch (e) {
     console.error(e);
-    if (!i.replied) i.reply("⚠️ Error handled safely");
+    if(!interaction.replied) interaction.reply("⚠️ Error handled safely");
   }
 });
 
@@ -142,13 +150,13 @@ client.on("interactionCreate", async i => {
 ========================= */
 client.on("guildMemberAdd", async member => {
   const cfg = config[member.guild.id]?.welcome;
-  if (!cfg) return;
+  if(!cfg) return;
 
   const channel = await member.guild.channels.fetch(cfg.channel).catch(() => null);
-  if (!channel) return;
+  if(!channel) return;
 
-  let color = parseInt(cfg.color.replace("#", ""), 16);
-  if (isNaN(color)) color = 0x00ff99;
+  let color = parseInt(cfg.color.replace("#",""),16);
+  if(isNaN(color)) color = 0x00ff99;
 
   const embed = {
     color,
@@ -156,8 +164,7 @@ client.on("guildMemberAdd", async member => {
     description: cfg.message.replace("{user}", `<@${member.id}>`).replace("{server}", member.guild.name),
     thumbnail: { url: member.user.displayAvatarURL() }
   };
-
-  if (cfg.gif) embed.image = { url: cfg.gif };
+  if(cfg.gif) embed.image = { url: cfg.gif };
 
   channel.send({ embeds: [embed] }).catch(console.error);
 });
@@ -167,21 +174,20 @@ client.on("guildMemberAdd", async member => {
 ========================= */
 client.on("guildMemberRemove", async member => {
   const cfg = config[member.guild.id]?.goodbye;
-  if (!cfg) return;
+  if(!cfg) return;
 
   const channel = await member.guild.channels.fetch(cfg.channel).catch(() => null);
-  if (!channel) return;
+  if(!channel) return;
 
-  let color = parseInt(cfg.color.replace("#", ""), 16);
-  if (isNaN(color)) color = 0xff5555;
+  let color = parseInt(cfg.color.replace("#",""),16);
+  if(isNaN(color)) color = 0xff5555;
 
   const embed = {
     color,
     title: `👋 Goodbye`,
     description: cfg.message.replace("{user}", member.user.tag).replace("{server}", member.guild.name)
   };
-
-  if (cfg.gif) embed.image = { url: cfg.gif };
+  if(cfg.gif) embed.image = { url: cfg.gif };
 
   channel.send({ embeds: [embed] }).catch(console.error);
 });
@@ -201,4 +207,4 @@ client.login(process.env.TOKEN);
 ========================= */
 setInterval(() => {
   console.log("🟢 Keep-alive ping at " + new Date().toLocaleTimeString());
-}, 5 * 60 * 1000); // every 5 minutes
+}, 5 * 60 * 1000);
