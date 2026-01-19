@@ -5,34 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bible Helper Bot Dashboard</title>
   <style>
-    /* Navbar Styles */
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: #f6f6f6;
-      color: #222;
+    :root {
+      --green: #00ff99;
+      --gold: #ffd700;
+      --dark: #0b1a12;
+      --card: #11261a;
+      --white: #ffffff;
     }
 
+    * { box-sizing: border-box; margin:0; padding:0; }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #08140d, #0b1a12);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    /* Navbar */
     nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(90deg, #00ff99, #ffd700);
+      background: linear-gradient(90deg, var(--green), var(--gold));
       padding: 1rem 2rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
     nav h1 {
-      color: #fff;
-      font-size: 1.5rem;
-      margin: 0;
+      color: var(--dark);
+      font-size: 1.8rem;
     }
 
     nav ul {
       display: flex;
       list-style: none;
-      padding: 0;
-      margin: 0;
     }
 
     nav ul li {
@@ -40,24 +47,167 @@
     }
 
     nav ul li a {
+      color: var(--dark);
       text-decoration: none;
-      color: #fff;
       font-weight: bold;
-      transition: color 0.2s;
+      transition: all 0.3s;
     }
 
     nav ul li a:hover {
-      color: #000;
+      color: var(--white);
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    header h2 {
+      font-size: 2.5rem;
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: var(--gold);
+      font-size: 1.2rem;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,215,0,0.2);
+    }
+
+    .card h3 {
+      color: var(--gold);
+      margin-bottom: 15px;
+    }
+
+    .status {
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .online { color: var(--green); font-weight: bold; }
+    .offline { color: #ff5c5c; font-weight: bold; }
+
+    .command {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .command:last-child { border-bottom: none; }
+    .command-name { color: var(--green); font-weight: 600; }
+    .command-desc { color: var(--white); opacity: 0.8; }
+
+    .button {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 12px 25px;
+      background: linear-gradient(135deg, var(--green), var(--gold));
+      color: var(--dark);
+      font-weight: bold;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0,255,153,0.5);
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      opacity: 0.7;
+      font-size: 0.9rem;
+      margin-top: 50px;
     }
   </style>
 </head>
 <body>
+
   <nav>
     <h1>Bible Helper Bot</h1>
     <ul>
       <li><a href="/">Home</a></li>
-      <li><a href="#">Bible Engine Bot</a></li> <!-- Add your first bot's link here -->
+      <li><a href="https://deddsbot.onrender.com/" target="_blank">Bible Engine Bot</a></li>
     </ul>
   </nav>
+
+  <header>
+    <h2>High-Tech Bible Helper</h2>
+    <p>Spread God's Word with Welcome, Goodbye, and Announcement Commands</p>
+  </header>
+
+  <section class="container">
+
+    <div class="card">
+      <h3>🤖 Bot Status</h3>
+      <div id="status" class="status">Checking status...</div>
+    </div>
+
+    <div class="card">
+      <h3>📜 Commands</h3>
+      <div id="commands">
+        <div class="command"><div class="command-name">/ping</div><div class="command-desc">Check bot status</div></div>
+        <div class="command"><div class="command-name">/setwelcome</div><div class="command-desc">Set welcome message</div></div>
+        <div class="command"><div class="command-name">/setgoodbye</div><div class="command-desc">Set goodbye message</div></div>
+        <div class="command"><div class="command-name">/announce</div><div class="command-desc">Send announcement embed</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🚀 Get Started</h3>
+      <p>This bot allows servers to send custom welcome, goodbye messages and announcements with embeds. Perfect for keeping your server alive and organized using God’s Word.</p>
+      <a class="button" href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands" target="_blank">Invite to Discord</a>
+    </div>
+
+    <div class="card">
+      <h3>🛠 Developers</h3>
+      <p>Created and maintained by: <br>Dev Luke, Dev Zap, and <strong>Lead Dev Aether</strong></p>
+    </div>
+
+  </section>
+
+  <footer>
+    © 2026 Bible Helper Bot • Built with 💚 & ✨
+  </footer>
+
+  <script>
+    async function checkStatus() {
+      try {
+        // Use your deployed URL to check if bot website is alive
+        const res = await fetch("https://deddshelperbot.onrender.com/");
+        document.getElementById("status").innerHTML = res.ok
+          ? '<span class="online">ONLINE</span>'
+          : '<span class="offline">OFFLINE</span>';
+      } catch {
+        document.getElementById("status").innerHTML = '<span class="offline">OFFLINE</span>';
+      }
+    }
+
+    checkStatus();
+    setInterval(checkStatus, 15000); // Update every 15 seconds
+  </script>
+
 </body>
 </html>
