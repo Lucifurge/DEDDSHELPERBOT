@@ -5,19 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bible Helper Bot Dashboard</title>
   <link rel="icon" type="image/x-icon" href="logo.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     /* General Styles */
     body {
       margin: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: #0a0a0a;
+      font-family: "Montserrat", sans-serif;
+      background: linear-gradient(180deg,#0a0a0a,#111);
       color: #fff;
     }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
+    a { text-decoration: none; color: inherit; }
 
     /* Navbar */
     nav {
@@ -28,96 +25,66 @@
       padding: 1rem 2rem;
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
+    nav h1 { margin:0; font-size:1.8rem; font-weight:700; color:#000; }
+    nav ul { display:flex; list-style:none; margin:0; padding:0; }
+    nav ul li { margin-left:2rem; }
+    nav ul li a { font-weight:600; color:#000; transition:0.3s; }
+    nav ul li a:hover { color:#fff; }
 
-    nav h1 {
-      margin: 0;
-      font-size: 1.8rem;
-      color: #000;
-      font-weight: bold;
-    }
+    /* Container */
+    .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
 
-    nav ul {
-      display: flex;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    nav ul li {
-      margin-left: 2rem;
-    }
-
-    nav ul li a {
-      font-weight: bold;
-      color: #000;
-      transition: 0.3s;
-    }
-
-    nav ul li a:hover {
-      color: #fff;
-    }
-
-    /* Main Dashboard */
-    .container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-
+    /* Card Styles */
     .card {
-      background: linear-gradient(145deg, #111, #222);
+      background: linear-gradient(145deg,#111,#222);
       border: 1px solid #00ff99;
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 8px 20px rgba(0,255,153,0.3);
-      transition: transform 0.2s;
+      border-radius:12px;
+      padding:2rem;
+      margin-bottom:2rem;
+      box-shadow:0 8px 20px rgba(0,255,153,0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
     }
+    .card:hover { transform: translateY(-5px); box-shadow:0 12px 25px rgba(0,255,153,0.5); }
+    .card h3 { margin-top:0; color:#ffd700; }
 
-    .card:hover {
-      transform: translateY(-5px);
-    }
+    /* Status */
+    .status { font-size:1.2rem; margin-bottom:0.5rem; }
+    .online { color:#00ff99; font-weight:bold; }
+    .offline { color:#ff5555; font-weight:bold; }
 
-    .card h3 {
-      margin-top: 0;
-      margin-bottom: 1rem;
-      color: #ffd700;
-    }
-
-    .status {
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .online {
-      color: #00ff99;
-      font-weight: bold;
-    }
-
-    .offline {
-      color: #ff5555;
-      font-weight: bold;
-    }
-
+    /* Commands */
     .commands-list {
-      display: flex;
-      flex-wrap: wrap;
+      display:flex; flex-wrap:wrap; gap:1rem;
     }
-
     .commands-list div {
       flex: 1 1 200px;
-      margin: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: #111;
-      border-left: 4px solid #00ff99;
-      border-radius: 8px;
+      padding:0.5rem 1rem;
+      background:#111;
+      border-left:4px solid #00ff99;
+      border-radius:8px;
     }
 
-    .footer {
-      text-align: center;
-      margin: 3rem 0 1rem;
-      font-size: 0.9rem;
-      color: #888;
+    /* Invite Button */
+    .invite-btn {
+      display:inline-block;
+      margin-top:1rem;
+      padding:0.8rem 1.5rem;
+      background:linear-gradient(135deg,#00ff99,#ffd700);
+      color:#000;
+      font-weight:700;
+      border-radius:30px;
+      transition:0.3s;
+      box-shadow:0 6px 15px rgba(0,255,153,0.4);
+    }
+    .invite-btn:hover { transform:translateY(-3px); box-shadow:0 10px 25px rgba(0,255,153,0.6); }
+
+    /* Footer */
+    .footer { text-align:center; margin:3rem 0 1rem; font-size:0.9rem; color:#888; }
+
+    /* Responsive */
+    @media(max-width:768px){
+      nav ul li { margin-left:1rem; }
+      .commands-list { flex-direction:column; }
     }
   </style>
 </head>
@@ -136,6 +103,7 @@
       <h3>Bot Status</h3>
       <div id="status" class="status">Checking status...</div>
       <div id="servers" class="status">Servers: ...</div>
+      <a href="https://discord.com/oauth2/authorize?client_id=1460964137956933747&permissions=8&scope=bot%20applications.commands" target="_blank" class="invite-btn">Invite Bot</a>
     </div>
 
     <!-- Commands Card -->
@@ -145,15 +113,15 @@
         <div>/ping - Check bot status</div>
         <div>/setwelcome - Set welcome message</div>
         <div>/setgoodbye - Set goodbye message</div>
-        <div>/announce - Send an announcement embed</div>
+        <div>/announce - Send announcement embed</div>
       </div>
     </div>
 
     <!-- About Devs -->
     <div class="card">
       <h3>About the Developers</h3>
-      <p>This bot was created to spread the Bible and God’s Word using Discord. <br>
-      Developed by <strong>Dev Luke</strong>, <strong>Dev Zap</strong>, and <strong>Lead Dev Aether</strong>, the founders of the Bible Bots initiative.</p>
+      <p>This bot was created to spread the Bible and God’s Word using Discord.<br>
+      Developed by <strong>Dev Luke</strong>, <strong>Dev Zap</strong>, and <strong>Lead Dev Aether</strong>, founders of the Bible Bots initiative.</p>
     </div>
   </div>
 
